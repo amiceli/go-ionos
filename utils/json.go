@@ -1,4 +1,4 @@
-package IonosApi
+package Utils
 
 import (
 	"encoding/json"

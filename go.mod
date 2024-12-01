@@ -1,4 +1,4 @@
-module goolify
+module go-ionos
 
 go 1.23.1
 

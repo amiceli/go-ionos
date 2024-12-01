@@ -2,35 +2,14 @@ package main
 
 import (
 	"fmt"
-	IonosApi "goolify/goolify-api"
+	Ionos "go-ionos/ionos"
 	"os"
 
 	"github.com/erikgeiser/promptkit/selection"
 	"github.com/jedib0t/go-pretty/v6/table"
 )
 
-func chooseZone(zoneList IonosApi.IonosZoneList) IonosApi.IonosZone {
-	var names []string
-	var selectedZone IonosApi.IonosZone
-
-	for _, domain := range zoneList.Zones {
-		names = append(names, domain.Name)
-	}
-
-	sp := selection.New("Which zone to load ?", names)
-	choice, _ := sp.RunPrompt()
-
-	for _, domain := range zoneList.Zones {
-		if domain.Name == choice {
-			selectedZone = domain
-			break
-		}
-	}
-
-	return selectedZone
-}
-
-func printRecords(records IonosApi.IonosZoneRecords) {
+func printRecords(records Ionos.ZoneRecords) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"#", "Name", "Type"})
@@ -52,7 +31,7 @@ func main() {
 	if len(envApi) == 0 || len(envSecret) == 0 {
 		fmt.Println("missing env variables")
 	} else {
-		api := IonosApi.Api{
+		api := Ionos.Api{
 			ApiKey:    envApi,
 			ApiSecret: envSecret,
 		}
@@ -64,10 +43,23 @@ func main() {
 			fmt.Println("")
 			fmt.Println("")
 
-			selectedZone := chooseZone(zoneList)
+			selectedZone := Ionos.ChooseZone(zoneList)
 
-			zoneRecords := api.GetZone(selectedZone)
-			printRecords(zoneRecords)
+			if selectedZone != nil {
+				zoneRecords := api.GetZone(*selectedZone)
+
+				sp := selection.New("What do you want to do ?", []string{
+					"show records", "add record", "remove record",
+				})
+				action, _ := sp.RunPrompt()
+
+				switch action {
+				case "show records":
+					printRecords(zoneRecords)
+				case "add record":
+					break
+				}
+			}
 		}
 	}
 }

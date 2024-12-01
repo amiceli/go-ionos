@@ -1,7 +1,8 @@
-package IonosApi
+package Ionos
 
 import (
 	"fmt"
+	Utils "go-ionos/utils"
 	"net/http"
 	"strings"
 )
@@ -11,26 +12,35 @@ type Api struct {
 	ApiSecret string
 }
 
-type IonosZoneRecord struct {
+type ZoneRecord struct {
 	Id       string `json:"id"`
 	Name     string `json:"name"`
 	Type     string `json:"type"`
 	RootName string `json:"rootName"`
 }
 
-type IonosZoneRecords struct {
-	Recors []IonosZoneRecord `json:"records"`
+type ZoneRecords struct {
+	Recors []ZoneRecord `json:"records"`
 }
 
-type IonosZone struct {
+type Zone struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
 	Type string `json:"type"`
 }
 
-type IonosZoneList struct {
+type ZoneList struct {
 	Count int
-	Zones []IonosZone
+	Zones []Zone
+}
+
+func (zoneList *ZoneList) ZoneNames() []string {
+	var names []string
+	for _, domain := range zoneList.Zones {
+		names = append(names, domain.Name)
+	}
+
+	return names
 }
 
 func (api *Api) BaseUrl() string {
@@ -41,7 +51,7 @@ func (api *Api) apiKey() string {
 	return strings.Join([]string{api.ApiKey, api.ApiSecret}, ".")
 }
 
-func (api *Api) LoadZones() IonosZoneList {
+func (api *Api) LoadZones() ZoneList {
 	url := fmt.Sprintf("%s/dns/v1/zones", api.BaseUrl())
 
 	client := http.Client{}
@@ -54,15 +64,15 @@ func (api *Api) LoadZones() IonosZoneList {
 
 	res, _ := client.Do(req)
 
-	zones, _ := ParseJSON[[]IonosZone](res.Body)
+	zones, _ := Utils.ParseJSON[[]Zone](res.Body)
 
-	return IonosZoneList{
+	return ZoneList{
 		Count: len(zones),
 		Zones: zones,
 	}
 }
 
-func (api *Api) GetZone(zone IonosZone) IonosZoneRecords {
+func (api *Api) GetZone(zone Zone) ZoneRecords {
 	url := fmt.Sprintf("%s/dns/v1/zones/%s?recordType=A", api.BaseUrl(), zone.Id)
 
 	client := http.Client{}
@@ -76,7 +86,7 @@ func (api *Api) GetZone(zone IonosZone) IonosZoneRecords {
 	fmt.Sprintln("Before")
 	res, _ := client.Do(req)
 
-	zoneDetails, _ := ParseJSON[IonosZoneRecords](res.Body)
+	zoneDetails, _ := Utils.ParseJSON[ZoneRecords](res.Body)
 
 	return zoneDetails
 }
