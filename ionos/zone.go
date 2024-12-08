@@ -23,9 +23,16 @@ type ZoneRecord struct {
 	Name     string `json:"name"`
 	Type     string `json:"type"`
 	RootName string `json:"rootName"`
+	Content  string `json:"content"`
+	Ttl      int    `json:"ttl"`
+	Prio     int    `json:"prio"`
+	Disabled bool   `json:"disabled"`
 }
 
 type zoneRecords struct {
+	Id     string       `json:"id"`
+	Name   string       `json:"name"`
+	Type   string       `json:"type"`
 	Recors []ZoneRecord `json:"records"`
 }
 
