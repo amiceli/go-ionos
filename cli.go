@@ -18,16 +18,28 @@ func main() {
 		return
 	}
 
-	zones := api.Dns.GetZones()
+	Cli.ClearTerminal()
+	var command = Cli.ChooseCommand()
 
-	fmt.Printf("%d zone(s) found", len(zones))
+	switch command {
+	case Cli.LIST_ZONE:
+		zones := api.Dns.GetZones()
+		Cli.PrintZones(zones)
+	case Cli.LIST_ZONE_RECORDS:
+		zones := api.Dns.GetZones()
+		selectedZone := Cli.ChooseZone(zones)
 
-	selectedZone := Cli.ChooseZone(zones)
+		if selectedZone != nil {
+			recordType := Cli.ChooseRecordTpe()
+			records := selectedZone.GetRecords(recordType)
 
-	if selectedZone != nil {
-		recordType := Cli.ChooseRecordTpe()
-		records := selectedZone.GetRecords(recordType)
-
-		Cli.PrintRecords(records, recordType)
+			Cli.PrintRecords(Cli.PrintRecordsOptions{
+				Zone:       *selectedZone,
+				RecordType: recordType,
+				Records:    records,
+			})
+		}
+	default:
+		return
 	}
 }
