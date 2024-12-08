@@ -2,6 +2,7 @@ package Ionos
 
 import (
 	"errors"
+	"net/http"
 	"strings"
 )
 
@@ -11,6 +12,13 @@ type Api struct {
 	ApiKey    string
 	ApiSecret string
 	Dns       Dns
+}
+
+func (api *Api) HttpHeaders() map[string][]string {
+	return http.Header{
+		"accept":    {"application/json"},
+		"X-Api-Key": {api.apiKey()},
+	}
 }
 
 func GetApi(apiKey string, apiSecret string) (*Api, error) {

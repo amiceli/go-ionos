@@ -20,17 +20,14 @@ func (dns *Dns) GetZones() []Zone {
 	client := http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 
-	req.Header = http.Header{
-		"accept":    {"application/json"},
-		"X-Api-Key": {dns.api.apiKey()},
-	}
+	req.Header = dns.api.HttpHeaders()
 
 	res, _ := client.Do(req)
 
 	zones, _ := Utils.ParseJSON[[]Zone](res.Body)
 
 	for i := range zones {
-		zones[i].Dns = dns
+		zones[i].dns = dns
 	}
 
 	return zones

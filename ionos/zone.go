@@ -15,7 +15,7 @@ type Zone struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
 	// parent
-	Dns *Dns
+	dns *Dns
 }
 
 type ZoneRecord struct {
@@ -41,10 +41,7 @@ func (zone *Zone) GetRecords(recordType string) []ZoneRecord {
 	client := http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 
-	req.Header = http.Header{
-		"accept":    {"application/json"},
-		"X-Api-Key": {zone.Dns.api.apiKey()},
-	}
+	req.Header = zone.dns.api.HttpHeaders()
 
 	res, _ := client.Do(req)
 
