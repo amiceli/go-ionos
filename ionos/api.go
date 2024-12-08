@@ -1,92 +1,109 @@
 package Ionos
 
 import (
-	"fmt"
-	Utils "go-ionos/utils"
-	"net/http"
+	"errors"
 	"strings"
 )
+
+const apiBaseUrl = "https://api.hosting.ionos.com/"
 
 type Api struct {
 	ApiKey    string
 	ApiSecret string
+	Dns       Dns
 }
 
-type ZoneRecord struct {
-	Id       string `json:"id"`
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	RootName string `json:"rootName"`
-}
-
-type ZoneRecords struct {
-	Recors []ZoneRecord `json:"records"`
-}
-
-type Zone struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-	Type string `json:"type"`
-}
-
-type ZoneList struct {
-	Count int
-	Zones []Zone
-}
-
-func (zoneList *ZoneList) ZoneNames() []string {
-	var names []string
-	for _, domain := range zoneList.Zones {
-		names = append(names, domain.Name)
+func GetApi(apiKey string, apiSecret string) (*Api, error) {
+	if len(apiKey) == 0 || len(apiSecret) == 0 {
+		return nil, errors.New("missing env variables")
+	}
+	api := &Api{
+		ApiKey:    apiKey,
+		ApiSecret: apiSecret,
 	}
 
-	return names
-}
+	api.Dns = Dns{api: api}
 
-func (api *Api) BaseUrl() string {
-	return "https://api.hosting.ionos.com/"
+	return api, nil
 }
 
 func (api *Api) apiKey() string {
 	return strings.Join([]string{api.ApiKey, api.ApiSecret}, ".")
 }
 
-func (api *Api) LoadZones() ZoneList {
-	url := fmt.Sprintf("%s/dns/v1/zones", api.BaseUrl())
+//
 
-	client := http.Client{}
-	req, _ := http.NewRequest("GET", url, nil)
+// type ZoneRecord struct {
+// 	Id       string `json:"id"`
+// 	Name     string `json:"name"`
+// 	Type     string `json:"type"`
+// 	RootName string `json:"rootName"`
+// }
 
-	req.Header = http.Header{
-		"accept":    {"application/json"},
-		"X-Api-Key": {api.apiKey()},
-	}
+// type ZoneRecords struct {
+// 	Recors []ZoneRecord `json:"records"`
+// }
 
-	res, _ := client.Do(req)
+// type Zone struct {
+// 	Id   string `json:"id"`
+// 	Name string `json:"name"`
+// 	Type string `json:"type"`
+// }
 
-	zones, _ := Utils.ParseJSON[[]Zone](res.Body)
+// type ZoneList struct {
+// 	Count int
+// 	Zones []Zone
+// }
 
-	return ZoneList{
-		Count: len(zones),
-		Zones: zones,
-	}
-}
+// sturct avec attributs
+// const (
+// 	ZONES_API string = "dns/v1/zones"
+// )
 
-func (api *Api) GetZone(zone Zone) ZoneRecords {
-	url := fmt.Sprintf("%s/dns/v1/zones/%s?recordType=A", api.BaseUrl(), zone.Id)
+// func (zoneList *ZoneList) ZoneNames() []string {
+// 	var names []string
+// 	for _, domain := range zoneList.Zones {
+// 		names = append(names, domain.Name)
+// 	}
 
-	client := http.Client{}
-	req, _ := http.NewRequest("GET", url, nil)
+// 	return names
+// }
 
-	req.Header = http.Header{
-		"accept":    {"application/json"},
-		"X-Api-Key": {api.apiKey()},
-	}
+// func (api *Api) LoadZones() ZoneList {
+// 	url := fmt.Sprintf("%s/%s", apiBaseUrl, ZONES_API)
 
-	fmt.Sprintln("Before")
-	res, _ := client.Do(req)
+// 	client := http.Client{}
+// 	req, _ := http.NewRequest("GET", url, nil)
 
-	zoneDetails, _ := Utils.ParseJSON[ZoneRecords](res.Body)
+// 	req.Header = http.Header{
+// 		"accept":    {"application/json"},
+// 		"X-Api-Key": {api.apiKey()},
+// 	}
 
-	return zoneDetails
-}
+// 	res, _ := client.Do(req)
+
+// 	zones, _ := Utils.ParseJSON[[]Zone](res.Body)
+
+// 	return ZoneList{
+// 		Count: len(zones),
+// 		Zones: zones,
+// 	}
+// }
+
+// func (api *Api) GetZone(zone Zone) ZoneRecords {
+// 	url := fmt.Sprintf("%s/%s/%s?recordType=A", apiBaseUrl, ZONES_API, zone.Id)
+
+// 	client := http.Client{}
+// 	req, _ := http.NewRequest("GET", url, nil)
+
+// 	req.Header = http.Header{
+// 		"accept":    {"application/json"},
+// 		"X-Api-Key": {api.apiKey()},
+// 	}
+
+// 	res, _ := client.Do(req)
+
+// 	zoneDetails, _ := Utils.ParseJSON[ZoneRecords](res.Body)
+
+// 	return zoneDetails
+// }
