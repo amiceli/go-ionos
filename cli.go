@@ -25,7 +25,9 @@ func main() {
 	selectedZone := Cli.ChooseZone(zones)
 
 	if selectedZone != nil {
-		records := selectedZone.GetRecords()
-		Cli.PrintRecords(records)
+		recordType := Cli.ChooseRecordTpe()
+		records := selectedZone.GetRecords(recordType)
+
+		Cli.PrintRecords(records, recordType)
 	}
 }

@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	Ionos "go-ionos/ionos"
 	"os"
 
@@ -26,7 +27,22 @@ func ChooseZone(zones []Ionos.Zone) *Ionos.Zone {
 	return nil
 }
 
-func PrintRecords(records []Ionos.ZoneRecord) {
+func ChooseRecordTpe() string {
+	allTypes := append(Ionos.RecordTypes[:], "all")
+
+	sp := selection.New("Select record type", allTypes)
+	sp.PageSize = 10
+	choice, _ := sp.RunPrompt()
+
+	return choice
+}
+
+func PrintRecords(records []Ionos.ZoneRecord, recordType string) {
+	if len(records) == 0 {
+		fmt.Printf("No %s record found", recordType)
+		return
+	}
+
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"#", "Name", "Type"})

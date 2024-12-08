@@ -6,6 +6,10 @@ import (
 	"net/http"
 )
 
+var RecordTypes = [20]string{
+	"A", "AAAA", "CNAME", "MX", "NS", "SOA", "SRV", "TXT", "CAA", "TLSA", "SMIMEA", "SSHFP", "DS", "HTTPS", "SVCB", "CERT", "URI", "RP", "LOC", "OPENPGPKEY",
+}
+
 type Zone struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
@@ -25,8 +29,14 @@ type zoneRecords struct {
 	Recors []ZoneRecord `json:"records"`
 }
 
-func (zone *Zone) GetRecords() []ZoneRecord {
-	url := fmt.Sprintf("%s/%s/%s?recordType=A", apiBaseUrl, ZONES_API, zone.Id)
+func (zone *Zone) GetRecords(recordType string) []ZoneRecord {
+	var url string
+
+	if recordType == "all" {
+		url = fmt.Sprintf("%s/%s/%s", apiBaseUrl, ZONES_API, zone.Id)
+	} else {
+		url = fmt.Sprintf("%s/%s/%s?recordType=%s", apiBaseUrl, ZONES_API, zone.Id, recordType)
+	}
 
 	client := http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
